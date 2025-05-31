@@ -1,0 +1,11 @@
+{
+  "description": "----",
+  "gettext-domain": "juanmagd.dev",
+  "name": "Whoop UI",
+  "shell-version": [
+    "48"
+  ],
+  "url": "https://github.com/juanmagdev/Whoop-UI",
+  "uuid": "whoop-info@juanmag.dev",
+  "version": 1
+}
