@@ -2,8 +2,8 @@ import crypto from 'crypto';
 import readline from 'readline';
 
 // Configura tus datos de aplicación
-const CLIENT_ID = '86eabfcb-a2b2-4b44-869d-235f90f6fbb6';
-const CLIENT_SECRET = '4375b699a1b98d8550d46a0dc6ca8dd6a07b4a05cda44dabeabd2a1d760257bc';
+const CLIENT_ID = '';
+const CLIENT_SECRET = '';
 const REDIRECT_URI = 'http://localhost:8000/callback'; // Usa el que tengas registrado
 const state = crypto.randomBytes(8).toString('hex'); // Genera un state seguro
 
