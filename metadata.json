@@ -1,5 +1,5 @@
 {
-  "description": "----",
+  "description": "A GNOME Shell extension that displays key daily health metrics from your WHOOP device directly on the top panel.",
   "gettext-domain": "juanmagd.dev",
   "name": "Whoop Info",
   "shell-version": [
