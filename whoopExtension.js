@@ -15,26 +15,21 @@ export class WhoopExtension {
         this._api = new WhoopAPI(this._configPath);
         this._button = new PanelMenu.Button(0.0, 'WhoopPanel', false);
 
-        // Ruta base a los recursos de la extensión
         const extensionDir = GLib.build_filenamev([
             GLib.get_home_dir(),
             '.local/share/gnome-shell/extensions/whoop-info@juanmag.dev'
         ]);
 
-        // Crear layout horizontal para los iconos + textos
         this._layout = new St.BoxLayout({ vertical: false, style_class: 'panel-status-menu-box' });
 
-        // Cargar los iconos SVG
         this._iconSleep = this._createIcon(`${extensionDir}/img/sleep.svg`);
         this._iconRecovery = this._createIcon(`${extensionDir}/img/recovery.svg`);
         this._iconStrain = this._createIcon(`${extensionDir}/img/strain.svg`);
 
-        // Crear etiquetas vacías
         this._labelSleep = new St.Label({ text: '...', y_align: Clutter.ActorAlign.CENTER });
         this._labelRecovery = new St.Label({ text: '...', y_align: Clutter.ActorAlign.CENTER });
         this._labelStrain = new St.Label({ text: '...', y_align: Clutter.ActorAlign.CENTER });
 
-        // Añadir al layout
         this._layout.add_child(this._iconSleep);
         this._layout.add_child(this._labelSleep);
         this._layout.add_child(this._iconRecovery);
