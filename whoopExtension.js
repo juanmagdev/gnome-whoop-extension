@@ -45,7 +45,7 @@ export class WhoopExtension {
         this._button.add_child(this._layout);
 
         this._updateLoop();
-        this._interval = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 180, () => {
+        this._interval = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 900, () => {
             this._updateLoop();
             return true;
         });
@@ -54,8 +54,8 @@ export class WhoopExtension {
     _createIcon(path) {
         return new St.Icon({
             gicon: Gio.icon_new_for_string(path),
-            style_class: 'system-status-icon', // Usa clase de estilo estándar
-            icon_size: 18 // ajusta tamaño según necesidad
+            style_class: 'system-status-icon', 
+            icon_size: 18 
         });
     }
 
