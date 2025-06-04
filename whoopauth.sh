@@ -28,7 +28,16 @@ echo "$auth_url"
 echo -e "\nAfter authorizing, you'll be redirected to a URL containing a \"code\" parameter."
 echo "Copy and paste it here to continue.\n"
 
-read -p "📥 Paste the \"code\" from the URL here: " code
+read -p "📥 Paste the full callback URL here: " callback_url
+
+# Extract the 'code' parameter from the URL
+code=$(echo "$callback_url" | sed -n 's/.*code=\([^&]*\).*/\1/p')
+
+if [ -z "$code" ]; then
+  echo "❌ Could not extract the authorization code from the URL."
+  exit 1
+fi
+
 
 # Request token
 response=$(curl -s -X POST https://api.prod.whoop.com/oauth/oauth2/token \
