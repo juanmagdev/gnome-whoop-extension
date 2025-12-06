@@ -1,5 +1,6 @@
 // whoopAPI.js
 import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
 import Soup from 'gi://Soup?version=3.0';
 
 const ByteArray = imports.byteArray;
@@ -13,27 +14,41 @@ function encodeFormData(data) {
 }
 
 export class WhoopAPI {
-    constructor(configPath) {
-        this._configPath = configPath;
-        this._tokens = null;
+    constructor() {
+        this._settings = new Gio.Settings({
+            schema_id: 'org.gnome.shell.extensions.whoop-info'
+        });
         this._session = new Soup.Session();
         this._loadTokens();
     }
 
     _loadTokens() {
         try {
-            let [ok, contents] = GLib.file_get_contents(this._configPath);
-            if (!ok) throw new Error('No se pudo leer tokens.json');
-            this._tokens = JSON.parse(ByteArray.toString(contents));
+            const isAuthenticated = this._settings.get_boolean('is-authenticated');
+            if (!isAuthenticated) {
+                throw new Error('No authenticated');
+            }
+            
+            this._tokens = {
+                client_id: this._settings.get_string('client-id'),
+                client_secret: this._settings.get_string('client-secret'),
+                access_token: this._settings.get_string('access-token'),
+                refresh_token: this._settings.get_string('refresh-token')
+            };
         } catch (e) {
             log('[WhoopAPI] Error leyendo tokens: ' + e.message);
+            this._tokens = null;
         }
     }
 
     _saveTokens() {
         if (!this._tokens) return;
-        const data = JSON.stringify(this._tokens, null, 4);
-        GLib.file_set_contents(this._configPath, data);
+        
+        this._settings.set_string('client-id', this._tokens.client_id);
+        this._settings.set_string('client-secret', this._tokens.client_secret);
+        this._settings.set_string('access-token', this._tokens.access_token);
+        this._settings.set_string('refresh-token', this._tokens.refresh_token);
+        this._settings.set_boolean('is-authenticated', true);
     }
 
     async refreshToken() {
@@ -58,7 +73,7 @@ export class WhoopAPI {
     }
 
     async fetchEndpoint(path) {
-        const url = `${API_BASE}/developer/v1/${path}`;
+        const url = `${API_BASE}/developer/v2/${path}`;
         let msg = Soup.Message.new('GET', url);
         msg.request_headers.append('Authorization', `Bearer ${this._tokens.access_token}`);
         return await this._sendAsync(msg);

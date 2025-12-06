@@ -7,12 +7,7 @@ import { WhoopAPI } from './whoopAPI.js';
 
 export class WhoopExtension {
     constructor() {
-        this._configPath = GLib.build_filenamev([
-            GLib.get_home_dir(),
-            '.local/share/gnome-shell/extensions/whoop-info@juanmag.dev/tokens.json'
-        ]);
-
-        this._api = new WhoopAPI(this._configPath);
+        this._api = new WhoopAPI();
         this._button = new PanelMenu.Button(0.0, 'WhoopPanel', false);
 
         const extensionDir = GLib.build_filenamev([

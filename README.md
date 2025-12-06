@@ -26,16 +26,31 @@ Once set up, the extension runs in the background and updates your data automati
 ---
 
 ## 🛠️ Installation Guide
-<!-- [Installation Guide](#-installation-guide) -->
 
-To use this extension, you'll first need to create a WHOOP developer application and obtain the necessary credentials.
+### 1. Install the Extension
 
-### 1. Create a Developer App on WHOOP
+1. Clone or download this repository:
+   ```bash
+   git clone https://github.com/juanmagdev/gnome-whoop-extension.git
+   cd gnome-whoop-extension
+   ```
+
+2. Install the extension:
+   ```bash
+   make install
+   ```
+
+3. Restart GNOME Shell:
+   ```bash
+   make restart-shell
+   ```
+
+### 2. Create a Developer App on WHOOP
 
 1. Visit the [WHOOP Developer Portal](https://developer.whoop.com/).
 ![Create App](/img/image-3.png)
-1. Log in with your WHOOP account.
-2. Click **“Create an App”** and fill out the form as follows:
+2. Log in with your WHOOP account.
+3. Click **"Create an App"** and fill out the form as follows:
 
    | Field             | Value                                      |
    |-------------------|--------------------------------------------|
@@ -46,31 +61,39 @@ To use this extension, you'll first need to create a WHOOP developer application
    | **Scopes**        | Select **all** available scopes            |
    | **Webhook URL**   | (Leave empty)                              |
 
-3. After creating the app, you’ll receive your **Client ID** and **Client Secret**.
+4. After creating the app, you'll receive your **Client ID** and **Client Secret**.
 
 ![App Created](/img/image-4.png)
 
----
+### 3. Configure Authentication
 
-### 2. Obtain Access and Refresh Tokens
+1. Open GNOME Extensions app or go to Settings > Extensions
+2. Find "Whoop Info" and click on the settings icon (⚙️)
+3. In the preferences window:
+   - Enter your **Client ID** and **Client Secret** from step 2
+   - Click **"Start Authentication"**
+   - A browser window will open with the WHOOP authorization page
+   - Log in with your WHOOP account and authorize the application
+   - Copy the callback URL from your browser's address bar
+   - Paste it in the "Callback URL" field and click **"Process Callback"**
+4. If successful, you'll see "Authentication successful!" and the extension will be ready to use
 
-To authenticate the extension:
+### 4. Alternative: Command Line Authentication
+
+If you prefer using the command line, you can still use the original script:
 
 1. Open a terminal and navigate to the extension folder:
-
    ```bash
    cd ~/.local/share/gnome-shell/extensions/whoop-info@juanmag.dev
    ```
+
 2. Run the authentication script:
-    ```
-    ./whoopAuth.sh
-    ```
-3. When prompted:
-   1. Enter your Client ID and Client Secret.
-   2. A URL will be shown. Open it in your browser and log in with your WHOOP account.
-   3. After authorization, copy the full redirected URL and paste it into the terminal when asked.
+   ```bash
+   ./whoopauth.sh
+   ```
 
-If successful, a `tokens.json` file will be generated containing your access and refresh tokens.
+3. Follow the prompts to enter your credentials and complete the authorization process.
 
-### 3. Activate the Extension
-To activate the extension, restart GNOME Shell. You should now see your WHOOP metrics displayed in the top bar of your GNOME desktop.
+### 5. Verify Installation
+
+After successful authentication, you should see your WHOOP metrics (recovery, sleep, and strain) displayed in the top bar of your GNOME desktop.

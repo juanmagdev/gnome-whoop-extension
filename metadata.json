@@ -2,9 +2,11 @@
   "description": "A GNOME Shell extension that displays key daily health metrics from your WHOOP device directly on the top panel.",
   "gettext-domain": "juanmagd.dev",
   "name": "Whoop Info",
+  "settings-schema": "org.gnome.shell.extensions.whoop-info",
   "shell-version": [
     "47",
-    "48"
+    "48",
+    "49"
   ],
   "url": "https://github.com/juanmagdev/gnome-whoop-extension",
   "uuid": "whoop-info@juanmag.dev",

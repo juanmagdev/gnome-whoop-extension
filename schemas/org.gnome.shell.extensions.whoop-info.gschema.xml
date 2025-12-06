@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.whoop-info" path="/org/gnome/shell/extensions/whoop-info/">
+    <key name="client-id" type="s">
+      <default>''</default>
+      <summary>WHOOP Client ID</summary>
+      <description>Client ID for WHOOP API authentication</description>
+    </key>
+    <key name="client-secret" type="s">
+      <default>''</default>
+      <summary>WHOOP Client Secret</summary>
+      <description>Client Secret for WHOOP API authentication</description>
+    </key>
+    <key name="access-token" type="s">
+      <default>''</default>
+      <summary>WHOOP Access Token</summary>
+      <description>Access token for WHOOP API requests</description>
+    </key>
+    <key name="refresh-token" type="s">
+      <default>''</default>
+      <summary>WHOOP Refresh Token</summary>
+      <description>Refresh token for WHOOP API authentication</description>
+    </key>
+    <key name="is-authenticated" type="b">
+      <default>false</default>
+      <summary>Authentication Status</summary>
+      <description>Whether the user is authenticated with WHOOP</description>
+    </key>
+  </schema>
+</schemalist>

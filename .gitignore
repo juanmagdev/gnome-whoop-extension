@@ -1,1 +1,10 @@
-tokens.json
+# Compiled schemas
+schemas/gschemas.compiled
+
+# Backup files
+*~
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
