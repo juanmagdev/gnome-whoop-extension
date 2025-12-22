@@ -3,8 +3,6 @@ import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 import Soup from 'gi://Soup?version=3.0';
 
-const ByteArray = imports.byteArray;
-
 const API_BASE = 'https://api.prod.whoop.com';
 
 function encodeFormData(data) {
@@ -13,11 +11,25 @@ function encodeFormData(data) {
         .join('&');
 }
 
+function getSettings() {
+    const extensionDir = GLib.build_filenamev([
+        GLib.get_home_dir(),
+        '.local/share/gnome-shell/extensions/whoop-info@juanmag.dev'
+    ]);
+    
+    const schemaDir = Gio.File.new_for_path(`${extensionDir}/schemas`);
+    const schemaSource = Gio.SettingsSchemaSource.new_from_directory(
+        schemaDir.get_path(),
+        Gio.SettingsSchemaSource.get_default(),
+        false
+    );
+    const schema = schemaSource.lookup('org.gnome.shell.extensions.whoop-info', true);
+    return new Gio.Settings({ settings_schema: schema });
+}
+
 export class WhoopAPI {
     constructor() {
-        this._settings = new Gio.Settings({
-            schema_id: 'org.gnome.shell.extensions.whoop-info'
-        });
+        this._settings = getSettings();
         this._session = new Soup.Session();
         this._loadTokens();
     }
@@ -36,7 +48,7 @@ export class WhoopAPI {
                 refresh_token: this._settings.get_string('refresh-token')
             };
         } catch (e) {
-            log('[WhoopAPI] Error leyendo tokens: ' + e.message);
+            log('[WhoopAPI] Error reading tokens: ' + e.message);
             this._tokens = null;
         }
     }
@@ -52,6 +64,10 @@ export class WhoopAPI {
     }
 
     async refreshToken() {
+        if (!this._tokens) {
+            throw new Error('No tokens available');
+        }
+        
         const url = `${API_BASE}/oauth/oauth2/token`;
         const body = encodeFormData({
             grant_type: 'refresh_token',
@@ -73,6 +89,10 @@ export class WhoopAPI {
     }
 
     async fetchEndpoint(path) {
+        if (!this._tokens) {
+            throw new Error('No tokens available');
+        }
+        
         const url = `${API_BASE}/developer/v2/${path}`;
         let msg = Soup.Message.new('GET', url);
         msg.request_headers.append('Authorization', `Bearer ${this._tokens.access_token}`);
