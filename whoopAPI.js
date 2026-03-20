@@ -92,11 +92,15 @@ export class WhoopAPI {
         if (!this._tokens) {
             throw new Error('No tokens available');
         }
-        
+
         const url = `${API_BASE}/developer/v2/${path}`;
         let msg = Soup.Message.new('GET', url);
         msg.request_headers.append('Authorization', `Bearer ${this._tokens.access_token}`);
         return await this._sendAsync(msg);
+    }
+
+    async fetchCollection(path, limit = 7) {
+        return this.fetchEndpoint(`${path}?limit=${limit}`);
     }
 
     _sendAsync(message) {

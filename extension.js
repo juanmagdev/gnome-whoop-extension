@@ -5,7 +5,7 @@ import { WhoopExtension } from './whoopExtension.js';
 
 export default class WhoopInfoExtension extends Extension {
     enable() {
-        this._whoop = new WhoopExtension();
+        this._whoop = new WhoopExtension(this.getSettings('org.gnome.shell.extensions.whoop-info'));
         Main.panel.addToStatusArea('whoop-panel', this._whoop.actor);
     }
 

@@ -16,8 +16,141 @@ export default class WhoopInfoPreferences extends ExtensionPreferences {
             icon_name: 'avatar-default-symbolic',
         });
         window.add(authPage);
-
         this._buildAuthPage(authPage, settings, whoopAuth, window);
+
+        // ===== Display Page =====
+        const displayPage = new Adw.PreferencesPage({
+            title: 'Display',
+            icon_name: 'preferences-desktop-display-symbolic',
+        });
+        window.add(displayPage);
+        this._buildDisplayPage(displayPage, settings);
+    }
+
+    _buildDisplayPage(page, settings) {
+        // ===== Panel Metrics =====
+        const metricsGroup = new Adw.PreferencesGroup({
+            title: 'Panel Metrics',
+            description: 'Choose which metrics appear in the top bar',
+        });
+        page.add(metricsGroup);
+
+        const metrics = [
+            { key: 'show-recovery', title: 'Recovery Score', subtitle: 'Show recovery % with color indicator' },
+            { key: 'show-sleep',    title: 'Sleep Performance', subtitle: 'Show sleep performance %' },
+            { key: 'show-strain',   title: 'Daily Strain', subtitle: 'Show day strain score' },
+        ];
+
+        for (const { key, title, subtitle } of metrics) {
+            const row = new Adw.SwitchRow({ title, subtitle });
+            row.set_active(settings.get_boolean(key));
+            row.connect('notify::active', () => {
+                settings.set_boolean(key, row.get_active());
+            });
+            metricsGroup.add(row);
+        }
+
+        // ===== Panel Format =====
+        const formatGroup = new Adw.PreferencesGroup({
+            title: 'Panel Format',
+            description: 'Customize how metrics appear in the top bar',
+        });
+        page.add(formatGroup);
+
+        const iconsRow = new Adw.SwitchRow({
+            title: 'Show Icons',
+            subtitle: 'Display metric icons alongside values',
+        });
+        iconsRow.set_active(settings.get_boolean('panel-show-icons'));
+        iconsRow.connect('notify::active', () => {
+            settings.set_boolean('panel-show-icons', iconsRow.get_active());
+        });
+        formatGroup.add(iconsRow);
+
+        const unitRow = new Adw.SwitchRow({
+            title: 'Show Unit (%)',
+            subtitle: 'Display the % symbol next to values',
+        });
+        unitRow.set_active(settings.get_boolean('panel-show-unit'));
+        unitRow.connect('notify::active', () => {
+            settings.set_boolean('panel-show-unit', unitRow.get_active());
+        });
+        formatGroup.add(unitRow);
+
+        // ===== Update Interval =====
+        const updateGroup = new Adw.PreferencesGroup({
+            title: 'Update Interval',
+            description: 'How often to fetch new data from WHOOP',
+        });
+        page.add(updateGroup);
+
+        const intervalRow = new Adw.ComboRow({ title: 'Refresh every' });
+        const intervals = [5, 15, 30, 60];
+        const labels = ['5 minutes', '15 minutes', '30 minutes', '1 hour'];
+        const model = new Gtk.StringList();
+        labels.forEach(l => model.append(l));
+        intervalRow.set_model(model);
+
+        const currentInterval = settings.get_int('update-interval');
+        const currentIndex = intervals.indexOf(currentInterval);
+        intervalRow.set_selected(currentIndex >= 0 ? currentIndex : 1);
+
+        intervalRow.connect('notify::selected', () => {
+            settings.set_int('update-interval', intervals[intervalRow.get_selected()]);
+        });
+        updateGroup.add(intervalRow);
+
+        // ===== Units =====
+        const unitsGroup = new Adw.PreferencesGroup({
+            title: 'Units',
+            description: 'Measurement unit preferences',
+        });
+        page.add(unitsGroup);
+
+        const tempRow = new Adw.ComboRow({ title: 'Temperature' });
+        const tempModel = new Gtk.StringList();
+        ['Celsius (°C)', 'Fahrenheit (°F)'].forEach(l => tempModel.append(l));
+        tempRow.set_model(tempModel);
+        tempRow.set_selected(settings.get_string('temp-unit') === 'fahrenheit' ? 1 : 0);
+        tempRow.connect('notify::selected', () => {
+            settings.set_string('temp-unit', tempRow.get_selected() === 1 ? 'fahrenheit' : 'celsius');
+        });
+        unitsGroup.add(tempRow);
+
+        // ===== Notifications =====
+        const notifyGroup = new Adw.PreferencesGroup({
+            title: 'Notifications',
+            description: 'Get alerted when your recovery is low',
+        });
+        page.add(notifyGroup);
+
+        const notifyRow = new Adw.SwitchRow({
+            title: 'Low Recovery Alert',
+            subtitle: 'Notify when recovery score falls below the threshold',
+        });
+        notifyRow.set_active(settings.get_boolean('notify-low-recovery'));
+        notifyRow.connect('notify::active', () => {
+            const active = notifyRow.get_active();
+            settings.set_boolean('notify-low-recovery', active);
+            thresholdRow.set_sensitive(active);
+        });
+        notifyGroup.add(notifyRow);
+
+        const thresholdRow = new Adw.SpinRow({
+            title: 'Threshold',
+            subtitle: 'Alert when recovery falls below this %',
+            adjustment: new Gtk.Adjustment({
+                lower: 1,
+                upper: 100,
+                step_increment: 1,
+                value: settings.get_int('notify-recovery-threshold'),
+            }),
+            sensitive: settings.get_boolean('notify-low-recovery'),
+        });
+        thresholdRow.connect('notify::value', () => {
+            settings.set_int('notify-recovery-threshold', thresholdRow.get_value());
+        });
+        notifyGroup.add(thresholdRow);
     }
 
     _buildAuthPage(page, settings, whoopAuth, window) {
@@ -49,10 +182,11 @@ export default class WhoopInfoPreferences extends ExtensionPreferences {
         });
         page.add(authGroup);
 
+        const isAuth = settings.get_boolean('is-authenticated');
         const statusRow = new Adw.ActionRow({ title: 'Status' });
         const statusLabel = new Gtk.Label({
-            label: settings.get_boolean('is-authenticated') ? '✓ Connected' : '✗ Not connected',
-            css_classes: settings.get_boolean('is-authenticated') ? ['success'] : ['error'],
+            label: isAuth ? '✓ Connected' : '✗ Not connected',
+            css_classes: isAuth ? ['success'] : ['error'],
         });
         statusRow.add_suffix(statusLabel);
         authGroup.add(statusRow);
@@ -113,6 +247,23 @@ export default class WhoopInfoPreferences extends ExtensionPreferences {
         instructionsRow.add_suffix(linkButton);
         instructionsGroup.add(instructionsRow);
 
+        // ===== Account (Disconnect) Group =====
+        const dangerGroup = new Adw.PreferencesGroup({ title: 'Account' });
+        page.add(dangerGroup);
+
+        const logoutRow = new Adw.ActionRow({
+            title: 'Disconnect Account',
+            subtitle: 'Remove stored tokens and disconnect from WHOOP',
+        });
+        const logoutButton = new Gtk.Button({
+            label: 'Disconnect',
+            valign: Gtk.Align.CENTER,
+            css_classes: ['destructive-action'],
+            sensitive: settings.get_boolean('is-authenticated'),
+        });
+        logoutRow.add_suffix(logoutButton);
+        dangerGroup.add(logoutRow);
+
         // ===== Event Handlers =====
         let tempClientId = null;
         let tempClientSecret = null;
@@ -131,10 +282,10 @@ export default class WhoopInfoPreferences extends ExtensionPreferences {
                 tempClientId = clientId;
                 tempClientSecret = clientSecret;
                 Gio.AppInfo.launch_default_for_uri(authUrl, null);
-                
+
                 authButton.set_label('URL Opened ✓');
                 authButton.set_sensitive(false);
-                
+
                 GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, () => {
                     authButton.set_label('Open Browser');
                     authButton.set_sensitive(true);
@@ -156,7 +307,7 @@ export default class WhoopInfoPreferences extends ExtensionPreferences {
             if (!tempClientId || !tempClientSecret) {
                 tempClientId = clientIdRow.get_text().trim();
                 tempClientSecret = clientSecretRow.get_text().trim();
-                
+
                 if (!tempClientId || !tempClientSecret) {
                     this._showToast(window, 'Please click "Open Browser" first to start authentication');
                     return;
@@ -168,7 +319,7 @@ export default class WhoopInfoPreferences extends ExtensionPreferences {
 
             try {
                 const code = whoopAuth.extractCodeFromCallback(callbackUrl);
-                
+
                 whoopAuth.exchangeCodeForTokens(tempClientId, tempClientSecret, code)
                     .then(tokens => {
                         settings.set_string('client-id', tokens.client_id);
@@ -177,8 +328,6 @@ export default class WhoopInfoPreferences extends ExtensionPreferences {
                         settings.set_string('refresh-token', tokens.refresh_token);
                         settings.set_boolean('is-authenticated', true);
 
-                        statusLabel.set_label('✓ Connected');
-                        statusLabel.set_css_classes(['success']);
                         callbackRow.set_text('');
                         processButton.set_label('Complete Setup');
                         processButton.set_sensitive(false);
@@ -197,35 +346,20 @@ export default class WhoopInfoPreferences extends ExtensionPreferences {
             }
         });
 
-        // ===== Logout Group =====
-        if (settings.get_boolean('is-authenticated')) {
-            const dangerGroup = new Adw.PreferencesGroup({ title: 'Account' });
-            page.add(dangerGroup);
+        logoutButton.connect('clicked', () => {
+            settings.set_string('access-token', '');
+            settings.set_string('refresh-token', '');
+            settings.set_boolean('is-authenticated', false);
+            this._showToast(window, 'Disconnected from WHOOP');
+        });
 
-            const logoutRow = new Adw.ActionRow({
-                title: 'Disconnect Account',
-                subtitle: 'Remove stored tokens and disconnect from WHOOP',
-            });
-            const logoutButton = new Gtk.Button({
-                label: 'Disconnect',
-                valign: Gtk.Align.CENTER,
-                css_classes: ['destructive-action'],
-            });
-            
-            logoutButton.connect('clicked', () => {
-                settings.set_string('access-token', '');
-                settings.set_string('refresh-token', '');
-                settings.set_boolean('is-authenticated', false);
-                
-                statusLabel.set_label('✗ Not connected');
-                statusLabel.set_css_classes(['error']);
-                
-                this._showToast(window, 'Disconnected from WHOOP');
-            });
-            
-            logoutRow.add_suffix(logoutButton);
-            dangerGroup.add(logoutRow);
-        }
+        // React to auth state changes (fixes post-login/logout stale UI)
+        settings.connect('changed::is-authenticated', () => {
+            const authenticated = settings.get_boolean('is-authenticated');
+            statusLabel.set_label(authenticated ? '✓ Connected' : '✗ Not connected');
+            statusLabel.set_css_classes(authenticated ? ['success'] : ['error']);
+            logoutButton.set_sensitive(authenticated);
+        });
     }
 
     _showToast(window, message) {

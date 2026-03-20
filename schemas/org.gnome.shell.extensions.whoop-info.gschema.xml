@@ -27,5 +27,58 @@
       <summary>Authentication Status</summary>
       <description>Whether the user is authenticated with WHOOP</description>
     </key>
+
+    <!-- Display Settings -->
+    <key name="show-recovery" type="b">
+      <default>true</default>
+      <summary>Show Recovery in Panel</summary>
+      <description>Whether to show the recovery score in the top panel</description>
+    </key>
+    <key name="show-sleep" type="b">
+      <default>true</default>
+      <summary>Show Sleep in Panel</summary>
+      <description>Whether to show the sleep performance in the top panel</description>
+    </key>
+    <key name="show-strain" type="b">
+      <default>true</default>
+      <summary>Show Strain in Panel</summary>
+      <description>Whether to show the daily strain in the top panel</description>
+    </key>
+    <key name="update-interval" type="i">
+      <default>15</default>
+      <summary>Update Interval</summary>
+      <description>How often to refresh WHOOP data, in minutes</description>
+    </key>
+
+    <!-- Panel Format Settings -->
+    <key name="panel-show-icons" type="b">
+      <default>true</default>
+      <summary>Show Icons in Panel</summary>
+      <description>Whether to show metric icons in the top panel</description>
+    </key>
+    <key name="panel-show-unit" type="b">
+      <default>true</default>
+      <summary>Show Unit in Panel Labels</summary>
+      <description>Whether to show the % symbol next to values in the top panel</description>
+    </key>
+
+    <!-- Temperature Settings -->
+    <key name="temp-unit" type="s">
+      <default>'celsius'</default>
+      <summary>Temperature Unit</summary>
+      <description>Unit for displaying skin temperature (celsius or fahrenheit)</description>
+    </key>
+
+    <!-- Notification Settings -->
+    <key name="notify-low-recovery" type="b">
+      <default>false</default>
+      <summary>Notify on Low Recovery</summary>
+      <description>Send a notification when recovery score falls below threshold</description>
+    </key>
+    <key name="notify-recovery-threshold" type="i">
+      <default>33</default>
+      <summary>Recovery Notification Threshold</summary>
+      <description>Send notification when recovery score falls below this value</description>
+    </key>
   </schema>
 </schemalist>
